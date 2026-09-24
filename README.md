@@ -5,7 +5,8 @@ Open `index.html` in a browser. There is nothing to install or build.
 
 ## What it does
 
-- **Feet-inch-fraction math.** `5 Feet 6 Inch 3 ⁄ 8` is 5′ 6-3/8″. Results show at 1/16″ by default. Press the `1/16` key to switch between 1/2 and 1/64.
+- **Feet-inch-sixteenths entry.** The keypad has number keys 0–15. After you press `Inch`, the next number key is sixteenths, reduced automatically: `24 Feet 11 Inch 5` is 24′ 11-5/16″, `2` is 1/8, `4` is 1/4 and `12` is 3/4. On a keyboard, typing `1` then `5` gives 15/16. For other fractions use the `⁄` key: `3 ⁄ 8 Inch` is 3/8″.
+- **Feet-inch-fraction math.** Results show at 1/16″ by default. Press the `1/16` key to switch between 1/2 and 1/64.
 - **Unit tracking.** Length × length gives area, and area × length gives volume. Adding a length to an area is an error. A plain number added to a length uses that length's unit (5′ + 3 = 8′).
 - **Conversions.** Press `Feet`, `Inch`, `Yds`, `m`, `cm`, `mm` or `BdFt` on a result to convert it. Pressing `Feet` or `Inch` a second time switches to decimals.
 - **Areas and volumes.** Press a unit key twice or three times: `12 Feet Feet` is 12 sq ft.

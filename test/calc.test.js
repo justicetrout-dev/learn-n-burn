@@ -6,6 +6,7 @@ const { Calculator } = require('../calc.js');
 function run(keys, calc = new Calculator()) {
   for (const k of keys.split(/\s+/).filter(Boolean)) {
     if (/^\d{2,}$/.test(k)) [...k].forEach((d) => calc.press(d));
+    else if (k.startsWith('#')) calc.press(k.slice(1)); // single key, e.g. #15
     else calc.press(k);
   }
   return calc.view();
@@ -17,6 +18,22 @@ test('feet-inch-fraction entry and display', () => {
   assert.equal(run('5 ft 6 =').main, `5' 6"`);
   assert.equal(run('6 in 3 frac 8 in').main, `6-3/8"`);
   assert.equal(run('1 frac 2 ft =').main, `0' 6"`);
+});
+
+test('after Inch, number keys 0-15 are sixteenths', () => {
+  assert.equal(run('24 ft #11 in 5').main, `24' 11-5/16"`);
+  assert.equal(run('24 ft #11 in 5 =').main, `24' 11-5/16"`);
+  assert.equal(run('6 in 2 =').main, `6-1/8"`);
+  assert.equal(run('6 in 4 =').main, `6-1/4"`);
+  assert.equal(run('6 in 8 =').main, `6-1/2"`);
+  assert.equal(run('6 in #12 =').main, `6-3/4"`);
+  assert.equal(run('6 in #15 =').main, `6-15/16"`);
+  assert.equal(run('6 in 0 =').main, `6"`);
+  assert.equal(run('6 in 1 5 =').main, `6-15/16"`); // typed on a keyboard
+  assert.equal(run('6 in 1 7').main, `6-7/16"`); // 17 is too big, so 7 replaces it
+  assert.equal(run('5 ft 3 in 3 + 1 ft 1 in 13 =').main, `6' 5"`);
+  assert.equal(run('#12 ft #10 in').main, `12' 10"`);
+  assert.equal(run('#12 ft #10 in').info, 'next key = 16ths (0–15)');
 });
 
 test('adds and subtracts lengths', () => {

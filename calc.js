@@ -18,6 +18,7 @@
   const DEFAULT_TREAD = 10; // inches, IRC minimum
   const RESOLUTIONS = [2, 4, 8, 16, 32, 64];
   const REG_NAMES = ['rise', 'run', 'diag', 'pitch'];
+  const DIGIT_KEY = /^([0-9.]|1[0-5])$/; // keys 10-15 exist for sixteenths
 
   class CalcError extends Error {}
 
@@ -156,6 +157,7 @@
     return {
       cur: '', // digits being typed
       fracNum: null, // numerator once the fraction key is pressed
+      six: false, // after Inch, number keys 0-15 are sixteenths
       unit: null, // null | 'ft' (feet-inch) | 'in' | 'yd' | 'm' | 'cm' | 'mm' | 'bdft'
       feet: null,
       inches: null,
@@ -174,12 +176,21 @@
       const den = parseInt(e.cur, 10);
       return den ? e.fracNum / den : e.fracNum;
     }
+    if (e.six) return e.cur === '' ? null : parseInt(e.cur, 10) / 16;
     if (e.cur === '' || e.cur === '.') return null;
     return parseFloat(e.cur);
   }
 
+  function sixteenthsText(n) {
+    if (!n) return '0';
+    const g = gcd(n, 16);
+    return `${n / g}/${16 / g}`;
+  }
+
   function pendingText(e) {
-    return e.fracNum !== null ? `${e.fracNum}/${e.cur}` : e.cur;
+    if (e.fracNum !== null) return `${e.fracNum}/${e.cur}`;
+    if (e.six && e.cur !== '') return sixteenthsText(parseInt(e.cur, 10));
+    return e.cur;
   }
 
   function isEmptyEntry(e) {
@@ -216,6 +227,7 @@
     const pend = pendingText(e);
     let s;
     if (e.unit === null) s = pend || '0';
+    else if (e.six && pend) s = e.text.replace(/"(#?)$/, pend === '0' ? '"$1' : `-${pend}"$1`).replace('#', sup);
     else s = e.text.replace('#', sup) + (pend ? ` ${pend}` : '');
     return (e.neg ? '-' : '') + s;
   }
@@ -253,7 +265,7 @@
     press(key) {
       if (this.error) {
         if (key === 'clear') return this.clearAll();
-        if (!/^[0-9.]$/.test(key)) return;
+        if (!DIGIT_KEY.test(key)) return;
         this.clearAll();
       }
       if (!this.cycle || this.cycle.key !== key) this.cycle = null;
@@ -274,7 +286,7 @@
     }
 
     dispatch(key) {
-      if (/^[0-9.]$/.test(key)) return this.digit(key);
+      if (DIGIT_KEY.test(key)) return this.digit(key);
       switch (key) {
         case 'frac': return this.frac();
         case 'ft': case 'in': case 'yd': case 'm': case 'cm': case 'mm': case 'bdft':
@@ -327,8 +339,17 @@
         this.entry = newEntry();
       }
       const e = this.entry;
+      if (e.six) {
+        // One key per sixteenth; typing 1 then 5 on a keyboard also gives 15/16.
+        if (d === '.') return;
+        let n = parseInt(d.length > 1 ? d : e.cur + d, 10);
+        if (n > 15) n = parseInt(d, 10);
+        this.snap();
+        e.cur = String(n);
+        return;
+      }
       if (d === '.' && (e.cur.includes('.') || e.fracNum !== null)) return;
-      if (e.cur.replace('.', '').length >= 10) return;
+      if ((e.cur + d).replace('.', '').length > 10) return;
       this.snap();
       e.cur += d;
     }
@@ -339,6 +360,7 @@
       this.snap();
       e.fracNum = parseInt(e.cur, 10);
       e.cur = '';
+      e.six = false;
     }
 
     takePending() {
@@ -371,21 +393,24 @@
         } else return;
       } else if (u === 'in') {
         const canTake = e.power === 1 && (e.unit === null || e.unit === 'ft' || e.unit === 'in');
-        if (pend !== null && canTake && (e.inches === null || e.fracNum !== null)) {
+        const isFrac = e.fracNum !== null || e.six;
+        if (pend !== null && canTake && (e.inches === null || isFrac)) {
           this.snap();
-          const isFrac = e.fracNum !== null;
           const txt = this.takePending();
           if (e.inches === null) {
             e.inches = pend;
             e.text = e.unit === null ? `${txt}"#` : `${e.text} ${txt}"`;
             if (e.unit === null) e.unit = 'in';
-          } else if (isFrac) {
+            e.six = !isFrac;
+          } else {
             e.inches += pend;
-            e.text = e.text.replace(/"(#?)$/, `-${txt}"$1`);
+            if (pend) e.text = e.text.replace(/"(#?)$/, `-${txt}"$1`);
+            e.six = false;
           }
         } else if (again && e.unit === 'in') {
           this.snap();
           e.power++;
+          e.six = false;
           e.closed = true;
         } else return;
       } else {
@@ -680,7 +705,7 @@
       return {
         main: this.error ? 'Error' : this.entry ? entryText(this.entry) : format(this.x, this.res),
         label: this.error ? 'ERROR' : this.label,
-        info: this.error || this.info,
+        info: this.error || (this.entry && this.entry.six ? 'next key = 16ths (0–15)' : this.info),
         op: this.op ? opSym[this.op] : '',
         mem: !!this.mem,
         res: `1/${this.res}`,
