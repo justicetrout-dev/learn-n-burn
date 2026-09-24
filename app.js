@@ -15,6 +15,7 @@
     $('ind-op').textContent = v.op;
     $('ind-regs').textContent = v.regs.map((r) => REG_ABBR[r]).join(' ');
     $('ind-res').textContent = v.res;
+    $('ind-mode').textContent = v.mode;
     document.querySelector('[data-key="res"]').textContent = v.res;
 
     const tape = $('tape');
@@ -40,7 +41,7 @@
   const KEYMAP = {
     Enter: '=', '=': '=', Escape: 'clear', Delete: 'clear', Backspace: 'back',
     "'": 'ft', '"': 'in', '\\': 'frac', y: 'yd', m: 'm', c: 'cm',
-    r: 'rise', n: 'run', g: 'diag', p: 'pitch',
+    d: 'mode', r: 'rise', n: 'run', g: 'diag', p: 'pitch',
     '+': '+', '-': '-', '*': '*', x: '*', '/': '/',
   };
 

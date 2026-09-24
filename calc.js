@@ -153,8 +153,10 @@
 
   // ---------- number entry ----------
 
-  function newEntry() {
+  function newEntry(fis = false) {
     return {
+      fis, // Feet mode: keys are feet digits, then one inch key, then one 16ths key
+      keys: [], // key values typed in Feet mode
       cur: '', // digits being typed
       fracNum: null, // numerator once the fraction key is pressed
       six: false, // after Inch, number keys 0-15 are sixteenths
@@ -194,12 +196,26 @@
   }
 
   function isEmptyEntry(e) {
-    return e.cur === '' && e.fracNum === null && e.unit === null;
+    return e.cur === '' && e.fracNum === null && e.unit === null && e.keys.length === 0;
+  }
+
+  // Feet mode reads keys from the right: last = sixteenths, one before = inches, rest = feet.
+  function fisInches(keys) {
+    const n = keys.length;
+    const six = n >= 1 ? keys[n - 1] : 0;
+    const inch = n >= 2 ? keys[n - 2] : 0;
+    const feet = n >= 3 ? parseInt(keys.slice(0, n - 2).join(''), 10) : 0;
+    return feet * 12 + inch + six / 16;
   }
 
   function finalize(e) {
     const pend = pendingValue(e);
     let q;
+    if (e.fis) {
+      q = Q(fisInches(e.keys), 1, 'ftin');
+      if (e.neg) q.v = -q.v;
+      return q;
+    }
     switch (e.unit) {
       case null:
         q = Q(pend ?? 0);
@@ -222,7 +238,18 @@
     return q;
   }
 
+  // Shows Feet-mode keys as typed, like the Jobber: 2 4 5 10 → 24' 5-10/16" (simplified on =).
+  function fisText(keys) {
+    const n = keys.length;
+    const six = n >= 1 ? keys[n - 1] : 0;
+    const inch = n >= 2 ? keys[n - 2] : 0;
+    const feet = n >= 3 ? parseInt(keys.slice(0, n - 2).join(''), 10) : 0;
+    const frac = six ? `${six}/16` : '';
+    return `${fmtNum(feet, 0)}' ${inch && frac ? `${inch}-${frac}` : frac || inch}"`;
+  }
+
   function entryText(e) {
+    if (e.fis) return (e.neg ? '-' : '') + fisText(e.keys);
     const sup = e.power === 2 ? '²' : e.power === 3 ? '³' : '';
     const pend = pendingText(e);
     let s;
@@ -235,7 +262,8 @@
   // ---------- calculator ----------
 
   class Calculator {
-    constructor() {
+    constructor({ mode = 'fis' } = {}) {
+      this.mode = mode; // 'fis' = feet-inch-sixteenths entry, 'dec' = plain decimal entry
       this.res = 16;
       this.mem = null;
       this.tape = [];
@@ -299,6 +327,7 @@
         case 'back': return this.back();
         case 'clear': return this.clear();
         case 'res': return this.cycleRes();
+        case 'mode': this.mode = this.mode === 'fis' ? 'dec' : 'fis'; return;
         case 'mplus': return this.memAdd('+');
         case 'mminus': return this.memAdd('-');
         case 'rcl': return this.recall();
@@ -333,12 +362,37 @@
 
     // --- entry keys ---
 
+    // In Feet mode, entries are lengths, except the number after a length × or ÷.
+    fisEntry() {
+      if (this.mode !== 'fis') return false;
+      return !((this.op === '*' || this.op === '/') && this.acc && this.acc.dim > 0);
+    }
+
+    // Reinterpret a Feet-mode entry as the plain digits that were typed.
+    toRegular() {
+      const e = this.entry;
+      if (!e || !e.fis) return;
+      this.snap();
+      e.fis = false;
+      e.cur = e.keys.join('');
+      e.keys = [];
+    }
+
     digit(d) {
       if (!this.entry || this.entry.closed) {
         if (!this.op) this.acc = null;
-        this.entry = newEntry();
+        this.entry = newEntry(d !== '.' && this.fisEntry());
       }
       const e = this.entry;
+      if (e.fis) {
+        if (d === '.') this.toRegular();
+        else {
+          if (e.keys.length >= 10) return;
+          this.snap();
+          e.keys = [...e.keys, parseInt(d, 10)];
+          return;
+        }
+      }
       if (e.six) {
         // One key per sixteenth; typing 1 then 5 on a keyboard also gives 15/16.
         if (d === '.') return;
@@ -355,6 +409,7 @@
     }
 
     frac() {
+      this.toRegular();
       const e = this.entry;
       if (!e || e.closed || e.fracNum !== null || e.cur === '' || e.cur.includes('.')) return;
       this.snap();
@@ -372,6 +427,7 @@
     }
 
     unitKey(u) {
+      if (this.entry && this.entry.keys.length) this.toRegular();
       const e = this.entry;
       if (!e || isEmptyEntry(e)) {
         if (e) this.entry = null;
@@ -619,6 +675,7 @@
     }
 
     regKey(k) {
+      if (k === 'pitch') this.toRegular();
       if (this.entry || this.xSource === 'calc') {
         const q = this.commitEntry();
         this.storeReg(k, q);
@@ -631,6 +688,7 @@
     }
 
     degrees() {
+      this.toRegular();
       if (this.entry) {
         const q = this.commitEntry();
         if (q.dim !== 0 || q.v <= 0 || q.v >= 90) throw new CalcError('Angle must be 0–90°');
@@ -700,12 +758,20 @@
 
     // ---------- view ----------
 
+    entryHint() {
+      const e = this.entry;
+      if (!e) return '';
+      if (e.fis) return 'feet · inch · 16ths';
+      return e.six ? 'next key = 16ths (0–15)' : '';
+    }
+
     view() {
       const opSym = { '+': '+', '-': '−', '*': '×', '/': '÷' };
       return {
         main: this.error ? 'Error' : this.entry ? entryText(this.entry) : format(this.x, this.res),
         label: this.error ? 'ERROR' : this.label,
-        info: this.error || (this.entry && this.entry.six ? 'next key = 16ths (0–15)' : this.info),
+        info: this.error || this.entryHint() || this.info,
+        mode: this.mode === 'fis' ? 'FEET' : 'DEC',
         op: this.op ? opSym[this.op] : '',
         mem: !!this.mem,
         res: `1/${this.res}`,

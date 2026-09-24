@@ -19,7 +19,8 @@
           <span id="ind-mem" class="ind">M</span>
           <span id="ind-op" class="ind op"></span>
           <span id="ind-regs" class="ind regs"></span>
-          <span id="ind-res" class="ind res"></span>
+          <span id="ind-mode" class="ind mode"></span>
+          <span id="ind-res" class="ind"></span>
         </div>
         <div id="main" class="lcd-main">0</div>
         <div class="lcd-bottom">
@@ -47,7 +48,7 @@
         <button data-key="cm" class="k unit" title="Centimeters (c)">cm</button>
         <button data-key="mm" class="k unit" title="Millimeters">mm</button>
         <button data-key="res" class="k mem" title="Fraction resolution">1/16</button>
-        <button data-key="back" class="k mem" title="Backspace">⌫</button>
+        <button data-key="mode" class="k mode" title="Switch between Feet entry and plain decimal numbers (d)">FT/DEC</button>
         <button data-key="clear" class="k clear" title="Clear (Esc) — press twice to clear all, three times to reset rise/run">C</button>
 
         <button data-key="10" class="k num" title="10 — or 10/16 after Inch">10</button>
@@ -82,7 +83,8 @@
         <button data-key="." class="k num">•</button>
         <button data-key="neg" class="k num" title="Change sign">±</button>
         <button data-key="+" class="k op" title="Add (+)">+</button>
-        <button data-key="=" class="k op eq" title="Equals (Enter)">=</button>
+        <button data-key="back" class="k mem" title="Backspace">⌫</button>
+        <button data-key="=" class="k op" title="Equals (Enter)">=</button>
       </div>
     </section>
 
@@ -90,13 +92,14 @@
       <details class="help" open>
         <summary>How to enter numbers</summary>
         <ul>
-          <li><kbd>24</kbd> <kbd>Feet</kbd> <kbd>11</kbd> <kbd>Inch</kbd> <kbd>5</kbd> → 24′ 11-5/16″. After <kbd>Inch</kbd>, the number keys <kbd>0</kbd>–<kbd>15</kbd> are sixteenths: <kbd>2</kbd> = 1/8, <kbd>4</kbd> = 1/4, <kbd>12</kbd> = 3/4.</li>
-          <li>Other fractions: <kbd>3</kbd> <kbd>⁄</kbd> <kbd>8</kbd> <kbd>Inch</kbd> → 3/8″</li>
+          <li><strong>Feet mode</strong> (the default): type the feet, then <em>one</em> key for inches (0–11), then <em>one</em> key for sixteenths (0–15). <kbd>2</kbd> <kbd>4</kbd> <kbd>5</kbd> <kbd>10</kbd> → 24′ 5-10/16″, simplified to 5-5/8″ on <kbd>=</kbd>. <kbd>1</kbd> <kbd>2</kbd> <kbd>0</kbd> <kbd>0</kbd> → 12′.</li>
+          <li>After a length, <kbd>×</kbd> and <kbd>÷</kbd> take a plain number: <kbd>1</kbd> <kbd>0</kbd> <kbd>0</kbd> <kbd>0</kbd> <kbd>÷</kbd> <kbd>3</kbd> → 3′ 4″.</li>
+          <li><kbd>FT/DEC</kbd> switches to plain decimal numbers. In either mode you can still use unit keys: <kbd>12</kbd> <kbd>Feet</kbd>, <kbd>3</kbd> <kbd>⁄</kbd> <kbd>8</kbd> <kbd>Inch</kbd>, <kbd>2</kbd> <kbd>m</kbd>.</li>
           <li><kbd>12</kbd> <kbd>Feet</kbd> <kbd>Feet</kbd> → 12 sq ft (press 3× for cu ft)</li>
           <li>Press a unit key on a result to convert it. Press <kbd>Feet</kbd> or <kbd>Inch</kbd> again for decimals.</li>
           <li>Enter any two of <kbd>Rise</kbd> <kbd>Run</kbd> <kbd>Diag</kbd> <kbd>Pitch</kbd>, then press another one to solve it.</li>
           <li>Enter total floor-to-floor rise and press <kbd>Stair</kbd> repeatedly. Enter a length and press <kbd>Circ</kbd> for circumference and area.</li>
-          <li>Keyboard: digits, <kbd>+ − * /</kbd>, <kbd>'</kbd> feet, <kbd>"</kbd> inch, <kbd>\</kbd> fraction, <kbd>Enter</kbd>, <kbd>Esc</kbd>, <kbd>Backspace</kbd>.</li>
+          <li>Keyboard: digits, <kbd>+ − * /</kbd>, <kbd>'</kbd> feet, <kbd>"</kbd> inch, <kbd>\</kbd> fraction, <kbd>d</kbd> FT/DEC, <kbd>Enter</kbd>, <kbd>Esc</kbd>, <kbd>Backspace</kbd>. Keys 10–15 need the on-screen buttons in Feet mode.</li>
         </ul>
       </details>
       <div class="tape">

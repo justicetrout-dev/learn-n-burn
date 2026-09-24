@@ -93,7 +93,7 @@ body {
 #ind-mem { color: var(--lcd-dim); }
 #ind-mem.on { color: var(--lcd-ink); }
 .ind.op { min-width: 1ch; }
-.ind.res { margin-left: auto; }
+.ind.mode { margin-left: auto; }
 
 .lcd-main {
   text-align: right;
@@ -149,7 +149,7 @@ body {
 .k.mem { background: var(--key-mem); }
 .k.op { background: var(--key-op); font-size: 20px; }
 .k.clear { background: var(--key-fn); font-size: 16px; }
-.k.eq { grid-column: span 2; }
+.k.mode { background: var(--key-unit); font-size: 12px; }
 
 /* ---------- side panel ---------- */
 
