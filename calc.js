@@ -364,10 +364,20 @@
 
     // --- entry keys ---
 
-    // In Feet mode, entries are lengths, except the number after a length × or ÷.
+    // Like the Jobber, Feet mode has no plain numbers: every entry is feet-inch-sixteenths.
     fisEntry() {
-      if (this.mode !== 'fis') return false;
-      return !((this.op === '*' || this.op === '/') && this.acc && this.acc.dim > 0);
+      return this.mode === 'fis';
+    }
+
+    // Feet mode multiplies and divides lengths as numbers of feet and shows the answer
+    // as a length: 10' × 2" = 10 × 0.1667 = 1.667 → 1'-8". DEC mode tracks area and volume.
+    calc(a, op, b) {
+      const feetMath = this.mode === 'fis' && (op === '*' || op === '/') && a.dim <= 1 && b.dim <= 1;
+      if (!feetMath) return apply(a, op, b);
+      const ft = (q) => (q.dim === 1 ? q.v / 12 : q.v);
+      if (op === '/' && b.v === 0) throw new CalcError('Divide by zero');
+      const r = op === '*' ? ft(a) * ft(b) : ft(a) / ft(b);
+      return Q(r * 12, 1, 'ftin');
     }
 
     // Reinterpret a Feet-mode entry as the plain digits that were typed.
@@ -556,7 +566,7 @@
     operator(op) {
       this.commitEntry();
       if (this.op && this.xNew) {
-        const r = apply(this.acc, this.op, this.x);
+        const r = this.calc(this.acc, this.op, this.x);
         this.record(this.acc, this.op, this.x, r);
         this.x = r;
         this.xSource = 'calc';
@@ -570,7 +580,7 @@
       this.commitEntry();
       if (!this.op) return;
       const b = this.xNew ? this.x : this.acc;
-      const r = apply(this.acc, this.op, b);
+      const r = this.calc(this.acc, this.op, b);
       this.record(this.acc, this.op, b, r);
       this.acc = null;
       this.op = null;
@@ -579,6 +589,10 @@
 
     sqrt() {
       const { v, dim, unit } = this.commitEntry();
+      if (this.mode === 'fis' && dim === 1) {
+        if (v < 0) throw new CalcError('Negative root');
+        return this.setX(Q(Math.sqrt(v / 12) * 12, 1, 'ftin'), 'calc');
+      }
       if (dim !== 0 && dim !== 2) throw new CalcError(`Can't root a ${DIM_NAME[dim]}`);
       if (v < 0) throw new CalcError('Negative root');
       this.setX(Q(Math.sqrt(v), dim / 2, dim ? defaultUnit(1, family(unit)) : null), 'calc');
@@ -586,6 +600,7 @@
 
     square() {
       const { v, dim, unit } = this.commitEntry();
+      if (this.mode === 'fis' && dim === 1) return this.setX(Q((v / 12) * (v / 12) * 12, 1, 'ftin'), 'calc');
       if (dim > 1) throw new CalcError('Beyond volume');
       this.setX(Q(v * v, dim * 2, dim ? defaultUnit(2, family(unit)) : null), 'calc');
     }

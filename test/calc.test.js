@@ -164,9 +164,14 @@ test('Feet mode (default): feet digits, then one inch key, then one 16ths key', 
   assert.equal(fis('1 0 0 0 =').main, `10'-0\"`);
   assert.equal(fis('1 2 3 0').main, `12'-3 0/16`);
   assert.equal(fis('1 0 0 0 + 2 6 8 =').main, `12'-6 1/2\"`);
-  assert.equal(fis('1 0 0 0 / 3 =').main, `3'-4\"`); // number after length ÷
-  assert.equal(fis('1 0 0 0 * 3 =').main, `30'-0\"`);
-  assert.equal(fis('1 2 ft * 1 0 ft =').main, '120 sq ft'); // unit keys still work
+  // No plain numbers in Feet mode: × and ÷ work in feet and answer with a length, like the Jobber.
+  assert.equal(fis('1 0 0 0 * 2 0 =').main, `1'-8\"`);
+  assert.equal(fis('1 0 0 0 / 3 0 0 =').main, `3'-4\"`);
+  assert.equal(fis('1 0 0 0 * 3 0 0 =').main, `30'-0\"`);
+  assert.equal(fis('1 0 0 0 / 3 =').main, `640'-0\"`); // 3 alone is 3/16"
+  assert.equal(fis('1 2 ft * 1 0 ft =').main, `120'-0\"`);
+  assert.equal(fis('3 0 0 sq').main, `9'-0\"`);
+  assert.equal(fis('mode 1 2 ft * 1 0 ft =').main, '120 sq ft'); // DEC mode tracks area
   assert.equal(fis('2 4 5 #10 back').main, `2'-4 5/16`);
   assert.equal(fis('1 . 5 =').main, '1.5');
   assert.equal(fis('6 pitch 1 2 0 0 run rise').main, `6'-0\"`);
