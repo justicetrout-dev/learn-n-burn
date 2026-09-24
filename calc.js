@@ -18,6 +18,8 @@
   const DEFAULT_TREAD = 10; // inches, IRC minimum
   const RESOLUTIONS = [2, 4, 8, 16, 32, 64];
   const REG_NAMES = ['rise', 'run', 'diag', 'pitch'];
+  // 'diag' is the slope length (the Jobber's SLP key): the diagonal along the slope.
+  const REG_LABEL = { rise: 'RISE', run: 'RUN', diag: 'SLOPE', pitch: 'PITCH' };
   const DIGIT_KEY = /^([0-9.]|1[0-5])$/; // keys 10-15 exist for sixteenths
 
   class CalcError extends Error {}
@@ -331,6 +333,7 @@
         case 'mminus': return this.memAdd('-');
         case 'rcl': return this.recall();
         case 'mc': this.mem = null; return;
+        case 'slope': return this.regKey('diag');
         case 'rise': case 'run': case 'diag': case 'pitch': return this.regKey(key);
         case 'deg': return this.degrees();
         case 'stair': return this.stairs();
@@ -534,7 +537,7 @@
       }
       this.resetRegs();
       this.label = 'CLEARED';
-      this.info = 'Rise, run, diag and pitch reset';
+      this.info = 'Rise, run, slope and pitch reset';
     }
 
     cycleRes() {
@@ -610,7 +613,7 @@
         if (q.dim > 1) throw new CalcError('Pitch is inches per foot');
         v = q.v;
       } else {
-        if (q.dim !== 1) throw new CalcError(`${k.toUpperCase()} needs a length`);
+        if (q.dim !== 1) throw new CalcError(`${REG_LABEL[k]} needs a length`);
         v = q.v;
         this.regUnit = q.unit;
       }
@@ -630,7 +633,7 @@
       const has = (a, b) => R[a] && R[b];
       const val = (a) => R[a].v;
       const leg = (hyp, side) => {
-        if (hyp <= side) throw new CalcError('Diagonal too short');
+        if (hyp <= side) throw new CalcError('Slope too short');
         return Math.sqrt(hyp * hyp - side * side);
       };
       const ang = () => Math.atan(val('pitch') / 12);
@@ -665,7 +668,7 @@
 
     showReg(k, v, stored) {
       this.setX(stored ? this.x : this.regQuantity(k, v), 'reg');
-      this.label = k.toUpperCase();
+      this.label = REG_LABEL[k];
       if (k === 'pitch') {
         const deg = (Math.atan(v / 12) * 180) / Math.PI;
         this.info = `${fmtNum(deg, 2)}° · ${fmtNum((v / 12) * 100, 1)}% grade`;
@@ -682,7 +685,7 @@
         return this.showReg(k, this.regs[k].v, true);
       }
       const v = this.getReg(k);
-      if (v === null) throw new CalcError('Enter 2 of Rise/Run/Diag/Pitch');
+      if (v === null) throw new CalcError('Enter 2 of Rise/Run/Slope/Pitch');
       this.showReg(k, v, false);
     }
 
@@ -698,7 +701,7 @@
         return;
       }
       const p = this.getReg('pitch');
-      if (p === null) throw new CalcError('Enter 2 of Rise/Run/Diag/Pitch');
+      if (p === null) throw new CalcError('Enter 2 of Rise/Run/Slope/Pitch');
       this.setX(Q((Math.atan(p / 12) * 180) / Math.PI, 0, 'deg'), 'reg');
       this.label = 'PITCH °';
       this.info = `${fmtNum(p, 3)}/12 pitch`;

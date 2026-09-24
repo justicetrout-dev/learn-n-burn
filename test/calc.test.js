@@ -109,6 +109,12 @@ test('calculation result can be stored into a register', () => {
   assert.equal(run('diag', c).main, `10'-0\"`);
 });
 
+test('Slope key gives the slope length, like the Jobber SLP key', () => {
+  const v = run('1 0 0 0 rise 5 0 0 0 run slope', new Calculator());
+  assert.equal(v.main, `50'-11 7/8"`);
+  assert.equal(v.label, 'SLOPE');
+});
+
 test('stairs', () => {
   const c = new Calculator({ mode: 'dec' });
   const v = run('8 ft 11 in stair', c);

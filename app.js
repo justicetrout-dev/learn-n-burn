@@ -3,7 +3,7 @@
 
   const calc = new BuilderCalc.Calculator();
   const $ = (id) => document.getElementById(id);
-  const REG_ABBR = { rise: 'RISE', run: 'RUN', diag: 'DIAG', pitch: 'PITCH' };
+  const REG_ABBR = { rise: 'RISE', run: 'RUN', diag: 'SLOPE', pitch: 'PITCH' };
 
   function render() {
     const v = calc.view();
@@ -41,7 +41,7 @@
   const KEYMAP = {
     Enter: '=', '=': '=', Escape: 'clear', Delete: 'clear', Backspace: 'back',
     "'": 'ft', '"': 'in', '\\': 'frac', y: 'yd', m: 'm', c: 'cm',
-    d: 'mode', r: 'rise', n: 'run', g: 'diag', p: 'pitch',
+    d: 'mode', r: 'rise', n: 'run', s: 'slope', p: 'pitch',
     '+': '+', '-': '-', '*': '*', x: '*', '/': '/',
   };
 
