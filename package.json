@@ -1,0 +1,9 @@
+{
+  "name": "learn-n-burn",
+  "version": "1.0.0",
+  "description": "Builder's construction calculator (feet-inch-fraction math, rise/run/pitch, stairs)",
+  "private": true,
+  "scripts": {
+    "test": "node --test test/"
+  }
+}

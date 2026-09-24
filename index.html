@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Builder's Calc</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="wrap">
+    <section class="calc" aria-label="Builder's construction calculator">
+      <header class="brand">
+        <span class="brand-small">The</span> Builder's Construction Calculator
+        <span class="model">FT·IN</span>
+      </header>
+
+      <div class="lcd" role="status" aria-live="polite">
+        <div class="lcd-top">
+          <span id="ind-mem" class="ind">M</span>
+          <span id="ind-op" class="ind op"></span>
+          <span id="ind-regs" class="ind regs"></span>
+          <span id="ind-res" class="ind res"></span>
+        </div>
+        <div id="main" class="lcd-main">0</div>
+        <div class="lcd-bottom">
+          <span id="label" class="lcd-label"></span>
+          <span id="info" class="lcd-info"></span>
+        </div>
+      </div>
+
+      <div class="keys" id="keys">
+        <button data-key="rise" class="k fn" title="Rise (r)">Rise</button>
+        <button data-key="run" class="k fn" title="Run (n)">Run</button>
+        <button data-key="diag" class="k fn" title="Diagonal (g)">Diag</button>
+        <button data-key="pitch" class="k fn" title="Pitch, inches per foot (p)">Pitch</button>
+        <button data-key="deg" class="k fn" title="Pitch in degrees">Deg°</button>
+        <button data-key="stair" class="k fn" title="Stairs — press repeatedly">Stair</button>
+
+        <button data-key="yd" class="k unit" title="Yards (y)">Yds</button>
+        <button data-key="ft" class="k unit" title="Feet (')">Feet</button>
+        <button data-key="in" class="k unit" title="Inch (&quot;)">Inch</button>
+        <button data-key="frac" class="k unit" title="Fraction bar (\)">⁄</button>
+        <button data-key="bdft" class="k unit" title="Board feet">BdFt</button>
+        <button data-key="circ" class="k fn" title="Circle from diameter — press repeatedly">Circ</button>
+
+        <button data-key="m" class="k unit" title="Meters (m)">m</button>
+        <button data-key="cm" class="k unit" title="Centimeters (c)">cm</button>
+        <button data-key="mm" class="k unit" title="Millimeters">mm</button>
+        <button data-key="res" class="k mem" title="Fraction resolution">1/16</button>
+        <button data-key="back" class="k mem" title="Backspace">⌫</button>
+        <button data-key="clear" class="k clear" title="Clear (Esc) — press twice to clear all, three times to reset rise/run">C</button>
+
+        <button data-key="7" class="k num">7</button>
+        <button data-key="8" class="k num">8</button>
+        <button data-key="9" class="k num">9</button>
+        <button data-key="/" class="k op" title="Divide (/)">÷</button>
+        <button data-key="sqrt" class="k mem" title="Square root">√x</button>
+        <button data-key="sq" class="k mem" title="Square">x²</button>
+
+        <button data-key="4" class="k num">4</button>
+        <button data-key="5" class="k num">5</button>
+        <button data-key="6" class="k num">6</button>
+        <button data-key="*" class="k op" title="Multiply (*)">×</button>
+        <button data-key="mplus" class="k mem">M+</button>
+        <button data-key="rcl" class="k mem">RCL</button>
+
+        <button data-key="1" class="k num">1</button>
+        <button data-key="2" class="k num">2</button>
+        <button data-key="3" class="k num">3</button>
+        <button data-key="-" class="k op" title="Subtract (-)">−</button>
+        <button data-key="mminus" class="k mem">M−</button>
+        <button data-key="mc" class="k mem">MC</button>
+
+        <button data-key="0" class="k num">0</button>
+        <button data-key="." class="k num">•</button>
+        <button data-key="neg" class="k num" title="Change sign">±</button>
+        <button data-key="+" class="k op" title="Add (+)">+</button>
+        <button data-key="=" class="k op eq" title="Equals (Enter)">=</button>
+      </div>
+    </section>
+
+    <section class="side">
+      <details class="help" open>
+        <summary>How to enter numbers</summary>
+        <ul>
+          <li><kbd>5</kbd> <kbd>Feet</kbd> <kbd>6</kbd> <kbd>Inch</kbd> <kbd>3</kbd> <kbd>⁄</kbd> <kbd>8</kbd> → 5′ 6-3/8″</li>
+          <li><kbd>12</kbd> <kbd>Feet</kbd> <kbd>Feet</kbd> → 12 sq ft (press 3× for cu ft)</li>
+          <li>Press a unit key on a result to convert it. Press <kbd>Feet</kbd> or <kbd>Inch</kbd> again for decimals.</li>
+          <li>Enter any two of <kbd>Rise</kbd> <kbd>Run</kbd> <kbd>Diag</kbd> <kbd>Pitch</kbd>, then press another one to solve it.</li>
+          <li>Enter total floor-to-floor rise and press <kbd>Stair</kbd> repeatedly. Enter a length and press <kbd>Circ</kbd> for circumference and area.</li>
+          <li>Keyboard: digits, <kbd>+ − * /</kbd>, <kbd>'</kbd> feet, <kbd>"</kbd> inch, <kbd>\</kbd> fraction, <kbd>Enter</kbd>, <kbd>Esc</kbd>, <kbd>Backspace</kbd>.</li>
+        </ul>
+      </details>
+      <div class="tape">
+        <h2>Tape</h2>
+        <ol id="tape" reversed></ol>
+      </div>
+    </section>
+  </main>
+
+  <script src="calc.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
