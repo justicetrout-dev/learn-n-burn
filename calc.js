@@ -77,7 +77,7 @@
 
   function inchText(whole, num, den) {
     if (!num) return `${whole}`;
-    return whole ? `${whole}-${num}/${den}` : `${num}/${den}`;
+    return whole ? `${whole} ${num}/${den}` : `${num}/${den}`;
   }
 
   function fmtFtIn(v, res) {
@@ -85,7 +85,7 @@
     const ft = Math.floor(n / (12 * res));
     const [whole, num, den] = inchParts((n - ft * 12 * res) / res, res);
     const neg = v < 0 && n > 0 ? '-' : '';
-    return `${neg}${fmtNum(ft, 0)}' ${inchText(whole, num, den)}"`;
+    return `${neg}${fmtNum(ft, 0)}'-${whole}${num ? ` ${num}/${den}` : ''}"`;
   }
 
   function fmtIn(v, res) {
@@ -238,14 +238,13 @@
     return q;
   }
 
-  // Shows Feet-mode keys as typed, like the Jobber: 2 4 5 10 → 24' 5-10/16" (simplified on =).
+  // Shows Feet-mode keys as typed, like the Jobber: 1 0 0 0 → 10'-0 0/16 (simplified on =).
   function fisText(keys) {
     const n = keys.length;
     const six = n >= 1 ? keys[n - 1] : 0;
     const inch = n >= 2 ? keys[n - 2] : 0;
     const feet = n >= 3 ? parseInt(keys.slice(0, n - 2).join(''), 10) : 0;
-    const frac = six ? `${six}/16` : '';
-    return `${fmtNum(feet, 0)}' ${inch && frac ? `${inch}-${frac}` : frac || inch}"`;
+    return `${fmtNum(feet, 0)}'-${inch} ${six}/16`;
   }
 
   function entryText(e) {
@@ -254,7 +253,7 @@
     const pend = pendingText(e);
     let s;
     if (e.unit === null) s = pend || '0';
-    else if (e.six && pend) s = e.text.replace(/"(#?)$/, pend === '0' ? '"$1' : `-${pend}"$1`).replace('#', sup);
+    else if (e.six && pend) s = e.text.replace(/"(#?)$/, pend === '0' ? '"$1' : ` ${pend}"$1`).replace('#', sup);
     else s = e.text.replace('#', sup) + (pend ? ` ${pend}` : '');
     return (e.neg ? '-' : '') + s;
   }
@@ -455,12 +454,12 @@
           const txt = this.takePending();
           if (e.inches === null) {
             e.inches = pend;
-            e.text = e.unit === null ? `${txt}"#` : `${e.text} ${txt}"`;
+            e.text = e.unit === null ? `${txt}"#` : `${e.text}-${txt}"`;
             if (e.unit === null) e.unit = 'in';
             e.six = !isFrac;
           } else {
             e.inches += pend;
-            if (pend) e.text = e.text.replace(/"(#?)$/, `-${txt}"$1`);
+            if (pend) e.text = e.text.replace(/"(#?)$/, ` ${txt}"$1`);
             e.six = false;
           }
         } else if (again && e.unit === 'in') {
